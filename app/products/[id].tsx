@@ -1,14 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useApi } from '../../context/ApiContext';
-import { useTheme } from '../../context/ThemeContext'; // ADD THIS
+import { useTheme } from '../../context/ThemeContext'; 
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
   const { products } = useApi();
-  const { isDark } = useTheme(); // ADD THIS
+  const { isDark } = useTheme(); 
 
-  const styles = getStyles(isDark); // DYNAMIC STYLES
+  const styles = getStyles(isDark);
 
   const product: any = products.find((p: any) => p.id == id);
 
