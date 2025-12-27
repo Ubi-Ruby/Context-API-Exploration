@@ -1,10 +1,36 @@
+// context/AuthContext.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const AuthContext = createContext<any>(null);
+// Define the auth context type
+interface AuthContextType {
+  userToken: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  loading: boolean;
+  isAuthenticated: boolean;
+}
 
-export const AuthProvider = ({ children }: any) => {
+// Create context with default values
+const AuthContext = createContext<AuthContextType>({
+  userToken: null,
+  login: async () => {},
+  logout: async () => {},
+  loading: true,
+  isAuthenticated: false,
+});
+
+// List of valid credentials
+const VALID_CREDENTIALS = [
+  { email: 'eve.holt@reqres.in', password: 'cityslicka' },
+  { email: 'george.bluth@reqres.in', password: 'cityslicka' },
+  { email: 'emma.wong@reqres.in', password: 'cityslicka' },
+  { email: 'janet.weaver@reqres.in', password: 'cityslicka' },
+  { email: 'charles.morris@reqres.in', password: 'cityslicka' },
+  { email: 'kanza@mail.com', password: '123456' },
+];
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userToken, setUserToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,6 +41,8 @@ export const AuthProvider = ({ children }: any) => {
         if (token) {
           setUserToken(token);
         }
+      } catch (error) {
+        console.error('Error loading token:', error);
       } finally {
         setLoading(false);
       }
@@ -22,20 +50,24 @@ export const AuthProvider = ({ children }: any) => {
     loadToken();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    try {
-      const res = await axios.post('https://reqres.in/api/login', {
-        email,
-        password,
-      });
-      
-      setUserToken(res.data.token);
-      await AsyncStorage.setItem('token', res.data.token);
-      return res.data.token; // Return the token
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Login failed');
+  const login = async (email: string, password: string) => {
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const isValid = VALID_CREDENTIALS.some(
+      cred => cred.email.toLowerCase() === email.toLowerCase() && 
+              cred.password === password
+    );
+    
+    if (!isValid) {
+      throw new Error('Invalid email or password');
     }
-  }, []);
+    
+    // Create a token
+    const mockToken = `mock_token_${email}_${Date.now()}`;
+    setUserToken(mockToken);
+    await AsyncStorage.setItem('token', mockToken);
+  };
 
   const logout = async () => {
     setUserToken(null);
@@ -55,4 +87,12 @@ export const AuthProvider = ({ children }: any) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
+};
