@@ -1,8 +1,7 @@
-// context/AuthContext.tsx
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Define the auth context type
 interface AuthContextType {
   userToken: string | null;
   login: (email: string, password: string) => Promise<void>;
@@ -11,7 +10,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
 }
 
-// Create context with default values
 const AuthContext = createContext<AuthContextType>({
   userToken: null,
   login: async () => {},
@@ -20,7 +18,6 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
 });
 
-// List of valid credentials
 const VALID_CREDENTIALS = [
   { email: 'eve.holt@reqres.in', password: 'cityslicka' },
   { email: 'george.bluth@reqres.in', password: 'cityslicka' },
@@ -63,7 +60,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error('Invalid email or password');
     }
     
-    // Create a token
     const mockToken = `mock_token_${email}_${Date.now()}`;
     setUserToken(mockToken);
     await AsyncStorage.setItem('token', mockToken);
